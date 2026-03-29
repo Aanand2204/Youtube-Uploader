@@ -1,22 +1,8 @@
-"""
-Entry point for the YouTube Auto-Uploader service.
-
-Run with:
-    python main.py
-
-Or directly via uvicorn:
-    uvicorn app.app:app --host 0.0.0.0 --port 8000 --reload
-"""
-
 import os
 import sys
 import asyncio
 import uvicorn
 
-# ── Inject FFMPEG_PATH bin directory into PATH early ──────────────────────────
-# Whisper calls ffmpeg internally as a subprocess. If ffmpeg is not on PATH
-# (common with WinGet installs), we must add its directory to os.environ["PATH"]
-# here so ALL child processes inherit it — including Whisper's audio loader.
 from dotenv import load_dotenv
 load_dotenv()
 
