@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Auto-Uploader — AI Powered</title>
+  <meta name="description" content="Upload a video and let AI generate the title, description, and tags — then publish it to YouTube automatically." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">▶</div>
+    <div>
+      <div class="logo-text">YouTube Auto-Uploader</div>
+      <div class="logo-sub">AI-Powered Metadata Generation</div>
+    </div>
+  </div>
+  <div class="header-badge">⚡ Whisper + Mistral + YouTube API</div>
+</header>
+
+<main>
+  <!-- Upload card -->
+  <div class="card">
+    <div class="card-title">🎬 Upload Video</div>
+    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-icon" id="drop-icon">☁️</div>
+      <div class="drop-title" id="drop-title">Drop your video here</div>
+      <div class="drop-sub">or click to browse</div>
+      <div class="drop-formats">
+        <span class="fmt-tag">MP4</span><span class="fmt-tag">MOV</span><span class="fmt-tag">AVI</span>
+        <span class="fmt-tag">MKV</span><span class="fmt-tag">WEBM</span><span class="fmt-tag">M4V</span>
+      </div>
+    </div>
+    <input type="file" id="file-input" accept=".mp4,.mov,.avi,.mkv,.webm,.m4v,video/*" />
+
+    <div class="file-info" id="file-info">
+      <span>🎥</span>
+      <span class="file-info-name" id="file-name"></span>
+      <span class="file-info-size" id="file-size"></span>
+      <button class="file-clear" onclick="clearFile()" title="Remove file">✕</button>
+    </div>
+
+    <div id="progress-bar-wrap">
+      <div id="progress-bar"></div>
+    </div>
+
+    <!-- Error box -->
+    <div id="error-box">
+      <div class="error-title">⚠️ Pipeline Error</div>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <button id="upload-btn" onclick="startUpload()" disabled>
+      <span id="btn-text">Select a video to upload</span>
+    </button>
+  </div>
+
+  <!-- Pipeline steps -->
+  <div class="card">
+    <div class="card-title">🔄 Pipeline Status</div>
+    <div class="pipeline-grid">
+      <div class="step-card" id="step-1"><div class="step-icon">🎵</div><div class="step-name">Audio Extraction</div><div class="step-status" id="step-1-status">Waiting</div><div class="step-time" id="step-1-time"></div></div>
+      <div class="step-card" id="step-2"><div class="step-icon">📝</div><div class="step-name">Transcription</div><div class="step-status" id="step-2-status">Waiting</div><div class="step-time" id="step-2-time"></div></div>
+      <div class="step-card" id="step-3"><div class="step-icon">🤖</div><div class="step-name">AI Metadata</div><div class="step-status" id="step-3-status">Waiting</div><div class="step-time" id="step-3-time"></div></div>
+      <div class="step-card" id="step-4"><div class="step-icon">📤</div><div class="step-name">YouTube Upload</div><div class="step-status" id="step-4-status">Waiting</div><div class="step-time" id="step-4-time"></div></div>
+    </div>
+  </div>
+
+  <!-- Review & Result section -->
+  <div id="result-section" class="card">
+    <div class="card-title" id="result-card-title">📝 Review AI Suggestions</div>
+    <div class="result-url-box" id="result-url-box" style="display:none">
+      <div class="result-url-icon">🎉</div>
+      <div style="flex:1">
+        <div class="result-url-text">Your video is live on YouTube</div>
+        <a class="result-url-link" id="yt-link" href="#" target="_blank" rel="noopener">—</a>
+      </div>
+      <button class="copy-btn" onclick="copyUrl()">📋 Copy URL</button>
+    </div>
+
+    <div class="meta-grid">
+      <div class="meta-block meta-full">
+        <div class="meta-label">Title</div>
+        <input type="text" class="meta-value" id="edit-title" style="width:100%; font-weight:600;" />
+      </div>
+      <div class="meta-block meta-full">
+        <div class="meta-label">Description</div>
+        <textarea class="meta-value" id="edit-desc" style="width:100%; height:180px; resize:vertical;"></textarea>
+      </div>
+      <div class="meta-block meta-full">
+        <div class="meta-label">Tags (comma separated)</div>
+        <input type="text" class="meta-value" id="edit-tags" style="width:100%;" />
+      </div>
+      <div class="meta-block"><div class="meta-label">Transcript Preview</div><div class="meta-value" id="meta-transcript" style="font-size:12px;color:var(--muted);max-height:100px;overflow-y:auto;">—</div></div>
+      <div class="meta-block"><div class="meta-label">Processing Time</div><div class="meta-value"><span class="duration-badge">⏱ <span id="meta-duration">—</span></span></div></div>
+    </div>
+    <button id="publish-btn" onclick="startPublishing()" style="width:100%; margin-top:24px; padding:16px; background:var(--green); color:white; border:none; border-radius:10px; font-weight:700; cursor:pointer;">🚀 Confirm & Publish to YouTube</button>
+  </div>
+
+  <!-- Log viewer -->
+  <div class="card">
+    <div class="log-toolbar">
+      <div class="card-title" style="margin-bottom:0">📋 Live Logs</div>
+      <div class="log-controls">
+        <span class="log-tail" id="log-count"></span>
+        <button class="log-btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">⟳ Auto</button>
+        <button class="log-btn" onclick="fetchLogs()">↺ Refresh</button>
+        <a href="/api/v1/logs/download" class="log-btn" style="text-decoration:none">⬇ Download</a>
+        <button class="log-btn" onclick="clearLogView()">✕ Clear</button>
+      </div>
+    </div>
+    <div id="log-container"><div class="log-empty">Logs will appear here once you start an upload…</div></div>
+  </div>
+</main>
+
+<footer>
+  YouTube Auto-Uploader &nbsp;·&nbsp; FastAPI + Whisper + Ollama &nbsp;·&nbsp;
+  <a href="/docs" style="color:var(--accent2);text-decoration:none">Swagger Docs</a>
+</footer>
+
+<script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

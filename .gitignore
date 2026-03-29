@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+youenv/
+env/
+ENV/
+youenv/
+
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Runtime directories
+uploads/
+audio/
+logs/
+
+# YouTube OAuth token (contains sensitive credentials — never commit)
+credentials/token.pickle
+credentials/token.json
+
+# Google client secrets (download from Google Cloud Console)
+credentials/client_secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Whisper model cache
+~/.cache/whisper/
+
+credentials/
